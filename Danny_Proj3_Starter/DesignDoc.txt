@@ -1,0 +1,52 @@
+// =================== CS251 DEX Project =================== // 
+//                      Design Document                      //
+//                          Names                            //
+// ========================================================= //  
+
+1. Explain why adding and removing liquidity to your exchange does not change the exchange rate.
+
+
+Adding and removing liqidity should be done in a way that does not change the exchange rate. The way we accomplish this is to ensure that the two assets are added in proportion to the existing reserves of the two assets. This way, no matter how much liquidity is added, the ratio between the two reserves stays constant and thus does not affect the exchange rate.
+
+
+2. Explain your scheme for rewarding liquidity providers and justify the design decisions you made. How does it satisfy requirements (2)-(4) from Section 5?
+
+Our scheme takes fees out of the input currency always, and checks to see if there are any accumulated fees in the other currency. If so, amounts of equal value of both currencies are deposited into the reserves such that the lesser value of the two accumulated pools is completely depleted (i.e. deposit as much as the accumulated fees as possible subject to maintaining xy=k).
+
+Requirement 2) The fee was taken out of the input currency each time. Subsequent calculations of how much asset to be returned were made after the fee had already been dictated.
+
+Requirement 3) Subject to requirement 4, fees were simply deposited into the reserves whenever possible. In doing so, liquidity was being added while none of the shares of the liquidity providers at the time would have been diluted. If a liquidity provider comes in after the fees have been deposited, they would not have claim to the fees as their share of liquidity would be calculated based on their contribution relative to the existing pool, which already includes the fees.
+
+Requirement 4) In order to maintain the constant product curve, we must only deposit eth and token in a ratio that is consistent with the ratio between the relative reserves. Our implementation accomplishes this by keeping track of two separate pools - uninvested_eth and uninvested_token. Fees are held in their respective uninvested pools until some fees are collected in the other currency, upon which we deposit as much of both currencies as possible in accordance with the reserve ratios at that time.
+
+
+3. Describe at least one method you used to minimize your exchange contract's gas usage. Why was this method effective?
+
+
+We believe that our implementation of how to keep track of liquidity provider's shares of the pool was quite gas efficient. While it appeared that the relative ownership would need to be re-calculated every time liquidity is added or removed, we chose an implementation that imitates a liquidity token. Every time liquidity is provided, we issue tokens proportional to their contribution relative to the pool at that time. Similarly, every time liquidity is removed, we only need to remove equity proportional to the amount of liquidity being removed at that time.
+
+Another gas saving strategy is only checking to deposit fees when new fees are added.
+
+
+4. Optional Feedback:
+4a. How much time did you spend on the assignment?
+
+A lot (11-12 hours). 
+
+4b. What is one thing that would have been useful to know before starting the assignment?
+
+Perhaps having a non-guest lecture cover core material like this would have been helpful. Perhaps having more DEX focused questions on the last homework might have also helped.
+
+4c. If you could change one with about this assignment, what would you change?
+
+If there was any way to print information from solidity to a console to debug, that would be amazing. Or even to know at which line in the solidity code things were going wrong when there was simply revert without an explanation. If that can't be done, not having to copy and paste the addresses each time would help speed things up too.
+
+4d. Please feel free to include any other feedback you may have below.
+
+Definitely very cool to be doing something like this on a class assignment. Was not good for my sleep, but very glad to have done something like this!
+
+I know that this isn't in line with policy in most other CS classes here either, but for an assignment of this magnitude maybe providing more sanity checks would be great. For example, having a sanity check out of 100, while expecting students to get only 80-90 or so, would make for a much more rewarding experience upon completing the assignment.
+
+On the other hand, the ability to sanity check and audit your code for errors is probably among the most important skills in crypto, so maybe the way it is right now is alright...? Although, I will say that a better place to check auditing ability would during an exam, where we are provided with some code and asked to identify potential errors. The costs of doing sanity checks on these assignments seems too high :(
+
+Oh an, would have been helpful to have the assert statement in the starter code for k balance to be a require statement instead of assert to help us locate when running into that error!
